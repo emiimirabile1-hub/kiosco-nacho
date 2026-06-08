@@ -64,42 +64,32 @@ function renderDashboard() {
     <div class="stat-card accent-blue">
       <div class="stat-label">Ventas Hoy</div>
       <div class="stat-value">$${totalHoy.toFixed(2)}</div>
-      <div class="stat-sub">${ventasHoy.length} venta(s) · Gasto: $${gastoHoy.toFixed(2)}</div>
+      <div class="stat-sub">${ventasHoy.length} ventas · Gasto: $${gastoHoy.toFixed(2)}</div>
     </div>
     <div class="stat-card accent-green">
       <div class="stat-label">Ventas del Mes</div>
       <div class="stat-value">$${totalMes.toFixed(2)}</div>
-      <div class="stat-sub">${ventasMes.length} ventas</div>
-    </div>
-    <div class="stat-card accent-orange">
-      <div class="stat-label">Total Ventas</div>
-      <div class="stat-value">$${totalVentas.toFixed(2)}</div>
-      <div class="stat-sub">${ventas.length} ventas · ${unidadesVendidas} unidades</div>
+      <div class="stat-sub">${ventasMes.length} ventas · $${totalVentas.toFixed(2)} totales</div>
     </div>
     <div class="stat-card ${gananciaNeta >= 0 ? 'accent-green' : 'accent-red'}">
       <div class="stat-label">Ganancia Neta</div>
       <div class="stat-value">$${gananciaNeta.toFixed(2)}</div>
-      <div class="stat-sub">Ventas - Compras</div>
+      <div class="stat-sub">Ventas $${totalVentas.toFixed(2)} · Compras $${totalCompras.toFixed(2)}</div>
     </div>
     <div class="stat-card accent-blue">
-      <div class="stat-label">Productos</div>
-      <div class="stat-value">${prods.length}</div>
-      <div class="stat-sub">Stock: ${stockTotal} ud · $${valorStock.toFixed(2)}</div>
-    </div>
-    <div class="stat-card accent-green">
       <div class="stat-label">💵 Efectivo</div>
       <div class="stat-value">$${efectivo.toFixed(2)}</div>
-      <div class="stat-sub">${cajaAbierta ? 'Caja abierta' : 'Caja cerrada'}</div>
+      <div class="stat-sub">💰 Total disponible: $${saldo.toFixed(2)}</div>
     </div>
     <div class="stat-card accent-orange">
       <div class="stat-label">💳 Mercado Pago</div>
       <div class="stat-value">$${mercadoPago.toFixed(2)}</div>
-      <div class="stat-sub">Tarjeta / Transferencia</div>
+      <div class="stat-sub">Tarjeta/Transferencia · ${prods.length} productos</div>
     </div>
     <div class="stat-card ${cajaAbierta ? 'accent-blue' : 'accent-red'}">
-      <div class="stat-label">💰 Total disp.</div>
-      <div class="stat-value">$${saldo.toFixed(2)}</div>
-      <div class="stat-sub">Efectivo + MP</div>
+      <div class="stat-label">Stock total</div>
+      <div class="stat-value">${stockTotal} ud</div>
+      <div class="stat-sub">$${valorStock.toFixed(2)} en mercadería · ${stockBajo.length} bajos</div>
     </div>
   `;
 

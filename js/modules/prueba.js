@@ -87,15 +87,18 @@ function generarDatosPrueba() {
         }
         if (!items.length) continue;
         const total = items.reduce((a, i) => a + i.subtotal, 0);
+        const medios = ['efectivo','efectivo','efectivo','efectivo','tarjeta','tarjeta','transferencia'];
+        const medioPago = medios[Math.floor(Math.random() * medios.length)];
         const t = {
           tipo: 'venta',
           items,
           total,
+          medioPago,
           detalle: 'Venta: ' + items.map(i => i.nombre).join(', '),
           fecha: fecha.toISOString()
         };
         addTransaccion(t);
-        addMovimientoCaja('venta', t.detalle, total);
+        addMovimientoCaja('venta', t.detalle, total, medioPago);
         ventasCreadas++;
       }
 
