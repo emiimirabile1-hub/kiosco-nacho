@@ -99,6 +99,10 @@
         <h3>⚠️ Productos con stock bajo</h3>
         <div id="alertasList"></div>
       </div>
+      <div class="stock-alertas">
+        <h3>🏆 Top productos más vendidos</h3>
+        <div id="topProductosList"></div>
+      </div>
       <div class="table-container" style="margin-top:20px">
         <table>
           <thead>
@@ -429,22 +433,30 @@
       <label>Categoría</label>
       <input type="text" id="prodCategoria" placeholder="Ej: Golosinas, Bebidas, Snacks..." />
     </div>
+    <div class="form-group">
+      <label>Modo de precio</label>
+      <div class="tabs" id="modoPrecioToggle" style="width:100%">
+        <button class="tab-btn active" data-modo="porcentaje" onclick="setModoPrecio('porcentaje')" style="flex:1">📊 Porcentaje</button>
+        <button class="tab-btn" data-modo="manual" onclick="setModoPrecio('manual')" style="flex:1">✏️ Manual</button>
+      </div>
+    </div>
     <div class="form-row">
       <div class="form-group">
         <label>Precio de compra ($)</label>
-        <input type="number" id="prodPrecioCompra" min="0" step=".01" oninput="calcularMargen()" />
+        <input type="number" id="prodPrecioCompra" min="0" step=".01" oninput="if(modoPrecioActual==='porcentaje')onCambioCompra();else onCambioPrecios()" />
       </div>
       <div class="form-group">
         <label>Precio de venta ($)</label>
-        <input type="number" id="prodPrecioVenta" min="0" step=".01" oninput="calcularMargen()" />
+        <input type="number" id="prodPrecioVenta" min="0" step=".01" oninput="onCambioPrecios()" />
       </div>
     </div>
     <div class="form-group">
       <label>Margen de ganancia (%)</label>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="number" id="prodMargen" min="0" max="1000" step="1" style="flex:1" />
-        <button type="button" class="btn btn-sm btn-outline" onclick="calcularPrecioVentaDesdeMargen()" title="Calcular precio de venta desde el margen">⚡ Calcular</button>
+        <input type="number" id="prodMargen" min="0" max="1000" step="1" style="flex:1" oninput="if(modoPrecioActual==='porcentaje')onCambioMargen()" />
+        <button type="button" class="btn btn-sm btn-primary" onclick="aplicarMargen()" id="btnAplicarMargen" title="Aplicar margen para calcular precio de venta">⚡ Aplicar</button>
       </div>
+      <p id="modoPrecioHint" style="font-size:11px;color:var(--text-light);margin-top:4px">💡 Cambiá precio compra o venta y el margen se calcula solo</p>
     </div>
       <div class="form-row">
         <div class="form-group">

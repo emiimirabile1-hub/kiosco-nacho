@@ -47,7 +47,44 @@ function renderProductos() {
     .join('');
 }
 
-function calcularMargen() {
+let modoPrecioActual = 'porcentaje';
+
+function setModoPrecio(modo) {
+  modoPrecioActual = modo;
+  document.querySelectorAll('#modoPrecioToggle .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`#modoPrecioToggle .tab-btn[data-modo="${modo}"]`).classList.add('active');
+  const hint = document.getElementById('modoPrecioHint');
+  const btn = document.getElementById('btnAplicarMargen');
+  if (modo === 'porcentaje') {
+    hint.textContent = '💡 Cambiá precio compra o margen y el precio de venta se calcula solo';
+    btn.textContent = '⚡ Calcular venta';
+    onCambioCompra();
+  } else {
+    hint.textContent = '✏️ Cambiá precio compra o venta y el margen se calcula solo';
+    btn.textContent = '⚡ Aplicar margen';
+    onCambioPrecios();
+  }
+}
+
+function onCambioCompra() {
+  if (modoPrecioActual !== 'porcentaje') return;
+  const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+  const m = parseFloat(document.getElementById('prodMargen').value) || 0;
+  if (pc > 0 && m > 0) {
+    document.getElementById('prodPrecioVenta').value = (pc * (1 + m / 100)).toFixed(2);
+  }
+}
+
+function onCambioMargen() {
+  if (modoPrecioActual !== 'porcentaje') return;
+  const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+  const m = parseFloat(document.getElementById('prodMargen').value) || 0;
+  if (pc > 0 && m > 0) {
+    document.getElementById('prodPrecioVenta').value = (pc * (1 + m / 100)).toFixed(2);
+  }
+}
+
+function onCambioPrecios() {
   const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
   const pv = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
   if (pc > 0 && pv > 0) {
@@ -56,14 +93,24 @@ function calcularMargen() {
   }
 }
 
-function calcularPrecioVentaDesdeMargen() {
-  const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
-  const m = parseFloat(document.getElementById('prodMargen').value) || 0;
-  if (pc > 0 && m > 0) {
-    const pv = pc * (1 + m / 100);
-    document.getElementById('prodPrecioVenta').value = pv.toFixed(2);
+function aplicarMargen() {
+  if (modoPrecioActual === 'porcentaje') {
+    const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+    const m = parseFloat(document.getElementById('prodMargen').value) || 0;
+    if (pc > 0 && m > 0) {
+      document.getElementById('prodPrecioVenta').value = (pc * (1 + m / 100)).toFixed(2);
+    } else {
+      alert('Completá precio de compra y margen');
+    }
   } else {
-    alert('Completá precio de compra y margen primero');
+    const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+    const pv = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
+    if (pc > 0 && pv > 0) {
+      const m = ((pv - pc) / pc) * 100;
+      document.getElementById('prodMargen').value = Math.round(m);
+    } else {
+      alert('Completá precio de compra y venta');
+    }
   }
 }
 
