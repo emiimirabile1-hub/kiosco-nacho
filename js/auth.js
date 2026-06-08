@@ -1,6 +1,7 @@
 const USUARIOS = [
-  { usuario: 'Admin', contraseña: '123', rol: 'admin', nombre: 'Administrador' },
-  { usuario: 'Cajera', contraseña: '123', rol: 'cajera', nombre: 'Cajera' }
+  { usuario: 'Admin', contraseña: 'Admin', rol: 'admin', nombre: 'Administrador' },
+  { usuario: 'Gestor', contraseña: 'Prueba', rol: 'gestor', nombre: 'Gestor' },
+  { usuario: 'Vendedor', contraseña: 'Prueba123', rol: 'vendedor', nombre: 'Vendedor' }
 ];
 
 let sesionActual = null;
@@ -47,7 +48,11 @@ function tieneAcceso(modulo) {
   const user = getUsuarioActual();
   if (!user) return false;
   if (user.rol === 'admin') return true;
-  if (user.rol === 'cajera') {
+  if (user.rol === 'gestor') {
+    const permitidos = ['dashboard', 'proyecciones', 'productos', 'ventas', 'compras', 'caja', 'historial'];
+    return permitidos.includes(modulo);
+  }
+  if (user.rol === 'vendedor') {
     const permitidos = ['dashboard', 'ventas', 'productos', 'historial'];
     return permitidos.includes(modulo);
   }

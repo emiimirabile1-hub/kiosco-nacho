@@ -165,12 +165,12 @@ function iniciarApp() {
   if (!user) return;
 
   document.getElementById('userNombre').textContent = user.usuario;
-  document.getElementById('userRol').textContent =
-    user.rol === 'admin' ? 'Admin' : 'Cajera';
+  const rolLabels = { admin: 'Admin', gestor: 'Gestor', vendedor: 'Vendedor' };
+  document.getElementById('userRol').textContent = rolLabels[user.rol] || user.rol;
 
   // Mostrar/ocultar según rol
-  const adminItems = ['compras', 'caja', 'config', 'proyecciones'];
-  adminItems.forEach(mod => {
+  const todasLasPaginas = ['dashboard','proyecciones','productos','ventas','compras','caja','historial','config'];
+  todasLasPaginas.forEach(mod => {
     document.querySelectorAll(`.nav-btn[data-page="${mod}"], .nav-item[data-page="${mod}"]`).forEach(el => {
       el.style.display = tieneAcceso(mod) ? '' : 'none';
     });
