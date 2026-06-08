@@ -369,7 +369,8 @@ function confirmarVenta() {
   addMovimientoCaja(
     'venta',
     'Venta: ' + carritoVenta.map(i => `${i.nombre} x${i.cantidad}`).join(', '),
-    total
+    total,
+    medio
   );
   carritoVenta.length = 0;
   renderCarritoVenta();

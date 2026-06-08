@@ -131,7 +131,7 @@ function cerrarSesionCaja(montoFinal, observacion) {
   saveData();
 }
 
-function addMovimientoCaja(tipo, detalle, monto) {
+function addMovimientoCaja(tipo, detalle, monto, medioPago) {
   const s = _data.sesionCaja;
   if (!s) return;
   const ultimoSaldo = s.movimientos.length
@@ -152,6 +152,7 @@ function addMovimientoCaja(tipo, detalle, monto) {
     saldo: ultimoSaldo + ingreso - egreso,
     fecha: new Date().toISOString()
   };
+  if (medioPago) mov.medioPago = medioPago;
   s.movimientos.push(mov);
   saveData();
 }

@@ -41,7 +41,28 @@ function renderDashboard() {
   });
   const top = Object.entries(topProductos).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
+  // Caja y medios de pago (sesión actual)
   const cajaAbierta = hayCajaAbierta();
+  const sesion = getSesionCaja();
+
+  // Calcular efectivo vs Mercado Pago desde transacciones de la sesión
+  let efectivo = 0, mercadoPago = 0;
+  if (cajaAbierta && sesion) {
+    const movs = sesion.movimientos || [];
+    efectivo = sesion.montoInicial || 0;
+
+    movs.forEach(m => {
+      if (m.tipo === 'venta') {
+        if (m.medioPago === 'efectivo' || !m.medioPago) efectivo += m.monto;
+        else mercadoPago += m.monto;
+      } else if (m.tipo === 'ingreso_extra') {
+        efectivo += m.monto;
+      } else if (m.tipo === 'compra' || m.tipo === 'gasto_extra') {
+        efectivo -= m.monto;
+      }
+    });
+  }
+
   const saldo = cajaAbierta ? saldoCajaActual() : 0;
 
   document.getElementById('dashboardStats').innerHTML = `
@@ -70,10 +91,20 @@ function renderDashboard() {
       <div class="stat-value">${prods.length}</div>
       <div class="stat-sub">Stock total: ${stockTotal} ud · $${valorStock.toFixed(2)} en mercadería</div>
     </div>
-    <div class="stat-card ${cajaAbierta ? 'accent-green' : 'accent-red'}">
-      <div class="stat-label">Caja</div>
+    <div class="stat-card accent-green">
+      <div class="stat-label">💵 Efectivo en caja</div>
+      <div class="stat-value">$${efectivo.toFixed(2)}</div>
+      <div class="stat-sub">${cajaAbierta ? '💰 Caja abierta' : '🔒 Caja cerrada'}</div>
+    </div>
+    <div class="stat-card accent-orange">
+      <div class="stat-label">💳 Mercado Pago</div>
+      <div class="stat-value">$${mercadoPago.toFixed(2)}</div>
+      <div class="stat-sub">Tarjeta / Transferencia</div>
+    </div>
+    <div class="stat-card ${cajaAbierta ? 'accent-blue' : 'accent-red'}">
+      <div class="stat-label">💰 Total disponible</div>
       <div class="stat-value">$${saldo.toFixed(2)}</div>
-      <div class="stat-sub">${cajaAbierta ? '🔓 Abierta' : '🔒 Cerrada'} · ${compras.length} compras registradas</div>
+      <div class="stat-sub">Efectivo + Mercado Pago</div>
     </div>
   `;
 
