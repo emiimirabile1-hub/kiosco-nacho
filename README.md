@@ -1,6 +1,6 @@
-# 🏪 Kiosco Nacho — Sistema de Gestión Escolar
+# 🏪 KioscoGO — Sistema de Gestión Escolar
 
-Bienvenido al sistema de gestión para el kiosco escolar. Esta aplicación te permite controlar **productos, ventas, compras, stock y caja** de forma simple y desde cualquier dispositivo con un navegador.
+Bienvenido a **KioscoGO**, el sistema de gestión para el kiosco escolar. Controlá **productos, ventas, compras, stock y caja** desde cualquier dispositivo.
 
 ---
 
