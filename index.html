@@ -95,13 +95,25 @@
       <h2>📊 Panel de Control</h2>
       <p class="subtitle">Resumen general del kiosco</p>
       <div class="dashboard-grid" id="dashboardStats"></div>
-      <div class="stock-alertas">
-        <h3>⚠️ Productos con stock bajo</h3>
-        <div id="alertasList"></div>
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>📈 Ventas últimos 14 días</h3>
+          <canvas id="chartVentasDiarias" width="400" height="200" style="width:100%;height:auto;max-width:100%;display:block;border-radius:8px"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>💳 Medios de pago</h3>
+          <canvas id="chartMediosPago" width="400" height="200" style="width:100%;height:auto;max-width:100%;display:block;border-radius:8px"></canvas>
+        </div>
       </div>
-      <div class="stock-alertas">
-        <h3>🏆 Top productos más vendidos</h3>
-        <div id="topProductosList"></div>
+      <div class="dashboard-grid" style="grid-template-columns:1fr 1fr;gap:14px">
+        <div class="stock-alertas" style="margin-bottom:0">
+          <h3>⚠️ Stock bajo</h3>
+          <div id="alertasList"></div>
+        </div>
+        <div class="stock-alertas" style="margin-bottom:0">
+          <h3>🏆 Más vendidos</h3>
+          <div id="topProductosList"></div>
+        </div>
       </div>
       <div class="table-container" style="margin-top:20px">
         <table>
