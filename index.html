@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kiosco Nacho - Sistema de Gestión</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="logo">🏪</div>
+    <h1>Kiosco Nacho</h1>
+    <p>Iniciá sesión para continuar</p>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="loginUsuario" placeholder="Ej: Admin" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="loginContraseña" placeholder="••••" />
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="btn btn-primary" id="loginBtn">Ingresar</button>
+    <div class="dark-mode-toggle-login" id="darkModeToggleLogin">🌙 Modo oscuro</div>
+  </div>
+</div>
+
+<!-- ========== HEADER ========== -->
+<header class="app-header">
+  <h1>🏪 Kiosco <span>Nacho</span></h1>
+  <div class="header-right">
+    <div class="header-user" id="headerUser">
+      <span>👤</span>
+      <span id="userNombre">—</span>
+      <span class="rol-badge" id="userRol">—</span>
+    </div>
+    <div class="caja-status" id="cajaStatus" title="Ir a Caja">
+      <span class="dot closed" id="cajaDot"></span>
+      <span id="cajaStatusText">Caja cerrada</span>
+      <span class="caja-monto" id="cajaMontoHeader">$0</span>
+    </div>
+    <button class="header-btn" id="darkModeBtn" title="Modo oscuro">🌙</button>
+    <button class="header-btn" id="logoutBtn" title="Cerrar sesión">🚪</button>
+    <span id="reloj" style="font-size:13px;opacity:.8"></span>
+  </div>
+</header>
+
+<!-- ========== APP CONTAINER ========== -->
+<div class="app-container">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <button class="nav-btn active" data-page="dashboard" title="Resumen general del kiosco">
+      <span class="icon">📊</span> Panel
+      <small>Resumen</small>
+    </button>
+    <button class="nav-btn" data-page="proyecciones" title="Proyecciones y análisis de rotación">
+      <span class="icon">📈</span> Proyecciones
+      <small>Análisis</small>
+    </button>
+    <button class="nav-btn" data-page="productos" title="Administrar catálogo de productos">
+      <span class="icon">📦</span> Productos
+      <small>Catálogo</small>
+    </button>
+    <button class="nav-btn" data-page="ventas" title="Registrar ventas y cobrar">
+      <span class="icon">💳</span> Ventas
+      <small>Cobrar</small>
+    </button>
+    <button class="nav-btn" data-page="compras" title="Ingresar mercadería nueva">
+      <span class="icon">📥</span> Compras
+      <small>Reponer stock</small>
+    </button>
+    <button class="nav-btn" data-page="caja" title="Abrir/cerrar caja y movimientos">
+      <span class="icon">💰</span> Caja
+      <small>Control diario</small>
+    </button>
+    <button class="nav-btn" data-page="historial" title="Todas las transacciones">
+      <span class="icon">📋</span> Historial
+      <small>Movimientos</small>
+    </button>
+    <button class="nav-btn" data-page="config" title="Configuración y respaldos">
+      <span class="icon">⚙️</span> Config
+      <small>Ajustes</small>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <h2>📊 Panel de Control</h2>
+      <p class="subtitle">Resumen general del kiosco</p>
+      <div class="dashboard-grid" id="dashboardStats"></div>
+      <div class="stock-alertas">
+        <h3>⚠️ Productos con stock bajo</h3>
+        <div id="alertasList"></div>
+      </div>
+      <div class="table-container" style="margin-top:20px">
+        <table>
+          <thead>
+            <tr><th>Hora</th><th>Tipo</th><th>Producto</th><th>Cant</th><th>Total</th></tr>
+          </thead>
+          <tbody id="ultimosMovimientos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PROYECCIONES -->
+    <section class="page" id="page-proyecciones">
+      <h2>📈 Proyecciones y Rotación</h2>
+      <p class="subtitle">Analizá qué productos rotan más y proyectá tus compras</p>
+      <div id="proyeccionesContent"></div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section class="page" id="page-productos">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div>
+          <h2>📦 Productos</h2>
+          <p class="subtitle" style="margin-bottom:0">Gestioná tu catálogo</p>
+        </div>
+        <button class="btn btn-primary" id="btnNuevoProducto" onclick="abrirModalProducto()">
+          + Nuevo Producto
+        </button>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="searchProductos" placeholder="Buscar producto..." oninput="renderProductos()" />
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th><th>Código</th><th>Categoría</th><th>P. Compra</th>
+              <th>P. Venta</th><th>Margen</th><th>Stock</th><th>Ganancia</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="productosTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VENTAS -->
+    <section class="page" id="page-ventas">
+      <h2>💳 Ventas</h2>
+      <p class="subtitle">Registrá las ventas del kiosco</p>
+      <div id="ventaSinCajaMsg" style="display:none">
+        <div class="empty-state">
+          <div class="icon">💰</div>
+          <p>Primero abrí la caja para poder vender</p>
+          <button class="btn btn-primary" onclick="navegar('caja')" style="margin-top:12px">Ir a Caja</button>
+        </div>
+      </div>
+      <div id="ventaContent" style="display:none">
+        <div class="search-bar">
+          <input type="text" id="searchVenta" placeholder="Buscar producto para vender..." oninput="renderProductosVenta()" style="flex:2" />
+          <div style="display:flex;gap:6px;flex:1">
+            <input type="text" id="barcodeInput" placeholder="Código de barras..." onkeydown="if(event.key==='Enter')buscarPorCodigoBarra()" style="flex:1;font-family:monospace" />
+            <button class="btn btn-outline" onclick="buscarPorCodigoBarra()" title="Buscar por código">🔍</button>
+            <button class="btn btn-primary" onclick="abrirEscaner()" title="Escanear código de barras">📷</button>
+          </div>
+        </div>
+        <div class="carrito-section">
+          <div class="carrito-lista" id="listaProductosVenta"></div>
+          <div class="carrito-sidebar">
+            <h3>🛒 Carrito</h3>
+            <div id="carritoItems"></div>
+            <div style="margin-top:12px">
+              <div class="form-group">
+                <label>Medio de pago</label>
+                <select id="medioPago">
+                  <option value="efectivo">Efectivo</option>
+                  <option value="tarjeta">Tarjeta</option>
+                  <option value="transferencia">Transferencia</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="carrito-total">
+              <span>Total:</span>
+              <span id="carritoTotal">$0</span>
+            </div>
+            <button class="btn btn-success" style="width:100%;margin-top:12px" onclick="confirmarVenta()">
+              ✅ Cobrar Venta
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPRAS -->
+    <section class="page" id="page-compras">
+      <h2>📥 Compras / Ingreso de Mercadería</h2>
+      <p class="subtitle">Registrá el ingreso de nuevos productos al stock</p>
+      <div id="compraSinCajaMsg" style="display:none">
+        <div class="empty-state">
+          <div class="icon">💰</div>
+          <p>Primero abrí la caja para registrar compras</p>
+          <button class="btn btn-primary" onclick="navegar('caja')" style="margin-top:12px">Ir a Caja</button>
+        </div>
+      </div>
+      <div id="compraContent" style="display:none">
+        <div class="carrito-section">
+          <div>
+            <div class="form-group">
+              <label>Producto</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select id="compraProductoSelect" style="flex:1;margin-bottom:0"></select>
+                <button class="btn btn-primary btn-sm" onclick="escanearCodigoCompra()" title="Escanear código de barras">📷</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" id="compraCantidad" min="1" value="1" />
+              </div>
+              <div class="form-group">
+                <label>Precio unitario ($)</label>
+                <input type="number" id="compraPrecio" min="0" step=".01" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="agregarItemCompra()">+ Agregar al carrito</button>
+            <div style="margin-top:16px">
+              <h4 style="margin-bottom:8px;font-size:14px">Productos a ingresar:</h4>
+              <div id="itemsCompraList"></div>
+            </div>
+          </div>
+          <div class="carrito-sidebar">
+            <h3>📥 Resumen de Compra</h3>
+            <div id="resumenCompraItems"></div>
+            <div class="carrito-total">
+              <span>Total:</span>
+              <span id="compraTotal">$0</span>
+            </div>
+            <div class="form-group" style="margin-top:12px">
+              <label>Proveedor</label>
+              <input type="text" id="compraProveedor" placeholder="Nombre del proveedor" />
+            </div>
+            <button class="btn btn-warning" style="width:100%;margin-top:12px" onclick="confirmarCompra()">
+              📥 Registrar Ingreso
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAJA -->
+    <section class="page" id="page-caja">
+      <h2>💰 Control de Caja</h2>
+      <p class="subtitle">Gestión de apertura, cierre y movimientos de caja</p>
+      <div id="cajaCerradaView">
+        <div class="empty-state">
+          <div class="icon">🔒</div>
+          <p>La caja está cerrada</p>
+          <button class="btn btn-success" onclick="abrirCajaForm()" style="margin-top:12px">🔓 Abrir Caja</button>
+        </div>
+      </div>
+      <div id="cajaAbiertaView" style="display:none">
+        <div class="dashboard-grid">
+          <div class="stat-card accent-blue">
+            <div class="stat-label">Monto Inicial</div>
+            <div class="stat-value" id="cajaMontoInicial">$0</div>
+          </div>
+          <div class="stat-card accent-green">
+            <div class="stat-label">Ingresos (Ventas)</div>
+            <div class="stat-value" id="cajaIngresos">$0</div>
+          </div>
+          <div class="stat-card accent-red">
+            <div class="stat-label">Egresos (Compras)</div>
+            <div class="stat-value" id="cajaEgresos">$0</div>
+          </div>
+          <div class="stat-card accent-orange">
+            <div class="stat-label">Saldo Actual</div>
+            <div class="stat-value" id="cajaSaldoActual">$0</div>
+          </div>
+        </div>
+        <div class="acciones-bar">
+          <button class="btn btn-outline" onclick="agregarMovimientoExtra()">➕ Ingreso Extra</button>
+          <button class="btn btn-outline" onclick="agregarGastoExtra()">➖ Gasto Extra</button>
+          <button class="btn btn-danger" onclick="cerrarCajaForm()">🔒 Cerrar Caja</button>
+        </div>
+        <div class="table-container" style="margin-top:16px">
+          <table>
+            <thead>
+              <tr><th>Hora</th><th>Tipo</th><th>Detalle</th><th>Ingreso</th><th>Egreso</th><th>Saldo</th></tr>
+            </thead>
+            <tbody id="movimientosCajaTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <h3 style="font-size:16px;margin-bottom:12px">📊 Historial de Cierres</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Apertura</th><th>Cierre</th><th>Inicial</th><th>Ventas</th><th>Compras</th><th>Final</th></tr>
+            </thead>
+            <tbody id="historialCierresTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section class="page" id="page-historial">
+      <h2>📋 Historial de Movimientos</h2>
+      <p class="subtitle">Todas las transacciones del kiosco</p>
+      <div class="search-bar">
+        <input type="text" id="searchHistorial" placeholder="Buscar en el historial..." oninput="renderHistorial()" />
+        <select id="filtroHistorialTipo" onchange="renderHistorial()">
+          <option value="todos">Todos</option>
+          <option value="venta">Ventas</option>
+          <option value="compra">Compras</option>
+          <option value="apertura">Aperturas</option>
+          <option value="cierre">Cierres</option>
+          <option value="ingreso_extra">Ingresos extra</option>
+          <option value="gasto_extra">Gastos extra</option>
+        </select>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Ingreso</th><th>Egreso</th></tr>
+          </thead>
+          <tbody id="historialTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CONFIG -->
+    <section class="page" id="page-config">
+      <h2>⚙️ Configuración</h2>
+      <p class="subtitle">Administrá los datos del sistema</p>
+      <div class="table-container" style="padding:24px">
+        <div style="margin-bottom:24px">
+          <h3 style="margin-bottom:12px;font-size:15px">📐 Margen de ganancia predeterminado</h3>
+          <p style="font-size:13px;color:var(--text-light);margin-bottom:8px">
+            Este margen se usará como valor inicial al crear nuevos productos.
+          </p>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" id="configMargen" min="0" max="1000" step="1" style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--input-bg);color:var(--text)" />
+              <span style="font-size:14px;color:var(--text-light)">%</span>
+            </div>
+            <button class="btn btn-primary" onclick="guardarMargenConfig()">💾 Guardar margen</button>
+          </div>
+        </div>
+        <div style="margin-bottom:24px">
+          <h3 style="margin-bottom:12px;font-size:15px">🗃️ Gestión de datos</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="descargarRespaldo()">📤 Exportar respaldo</button>
+            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar datos</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="manejarImportacion(event)" />
+            <button class="btn btn-danger" onclick="confirmarBorrarDatos()">🗑️ Borrar todos los datos</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:12px;font-size:15px">ℹ️ Información</h3>
+          <p style="color:var(--text-light);font-size:13px">
+            <strong>Kiosco Nacho</strong> v2.0 — Sistema de gestión escolar<br />
+            Los datos se guardan automáticamente en el navegador.<br />
+            Usá <strong>Exportar respaldo</strong> periódicamente para no perder información.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ========== BOTTOM NAV (MOBILE) ========== -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="nav-item active" data-page="dashboard">
+      <span class="icon">📊</span>
+      <span class="label">Panel</span>
+    </button>
+    <button class="nav-item" data-page="proyecciones">
+      <span class="icon">📈</span>
+      <span class="label">Proyecciones</span>
+    </button>
+    <button class="nav-item" data-page="productos">
+      <span class="icon">📦</span>
+      <span class="label">Productos</span>
+    </button>
+    <button class="nav-item" data-page="ventas">
+      <span class="icon">💳</span>
+      <span class="label">Ventas</span>
+    </button>
+    <button class="nav-item" data-page="compras">
+      <span class="icon">📥</span>
+      <span class="label">Compras</span>
+    </button>
+    <button class="nav-item" data-page="caja">
+      <span class="icon">💰</span>
+      <span class="label">Caja</span>
+    </button>
+    <button class="nav-item" data-page="historial">
+      <span class="icon">📋</span>
+      <span class="label">Historial</span>
+    </button>
+    <button class="nav-item" data-page="config">
+      <span class="icon">⚙️</span>
+      <span class="label">Config</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ========== MODAL PRODUCTO ========== -->
+<div class="modal-overlay" id="modalProducto">
+  <div class="modal">
+    <h3 id="modalProductoTitulo">Nuevo Producto</h3>
+    <div class="form-group">
+      <label>Nombre del producto</label>
+      <input type="text" id="prodNombre" placeholder="Ej: Alfajor Tofi" />
+    </div>
+    <div class="form-group">
+      <label>Código de barras</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="prodCodigoBarra" placeholder="Ej: 7791234567890" style="flex:1;font-family:monospace" onkeydown="if(event.key==='Enter')buscarProductoPorCodigo()" />
+        <button class="btn btn-primary btn-sm" onclick="escanearCodigoProducto()" title="Escanear código de barras con la cámara">📷</button>
+        <button class="btn btn-outline btn-sm" id="btnBuscarBarcode" onclick="buscarProductoPorCodigo()" title="Buscar producto por código de barras en base de datos abierta">🔍 Buscar</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Categoría</label>
+      <input type="text" id="prodCategoria" placeholder="Ej: Golosinas, Bebidas, Snacks..." />
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="prodAutoPrice" checked onchange="toggleModoPrecio()" />
+        <span>Auto-calcular precio de venta desde margen</span>
+      </label>
+    </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio de compra ($)</label>
+          <input type="number" id="prodPrecioCompra" min="0" step=".01" oninput="if(document.getElementById('prodAutoPrice').checked)recalcularPrecioVenta()" />
+        </div>
+        <div class="form-group">
+          <label>Precio de venta ($)</label>
+          <input type="number" id="prodPrecioVenta" min="0" step=".01" onblur="if(!document.getElementById('prodAutoPrice').checked)recalcularMargen()" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Margen de ganancia (%)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="prodMargen" min="0" max="1000" step="1" oninput="if(document.getElementById('prodAutoPrice').checked)recalcularPrecioVenta()" style="flex:1" />
+          <span style="font-size:11px;color:var(--text-light)" id="prodMargenHint">auto → precio venta</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Stock inicial</label>
+          <input type="number" id="prodStock" min="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Stock mínimo (alerta)</label>
+          <input type="number" id="prodStockMinimo" min="0" value="5" />
+        </div>
+      </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modalProducto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarProductoForm()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL EXTRA ========== -->
+<div class="modal-overlay" id="modalExtra">
+  <div class="modal">
+    <h3 id="modalExtraTitulo">Movimiento Extra</h3>
+    <div class="form-group">
+      <label>Descripción</label>
+      <input type="text" id="extraDescripcion" placeholder="Ej: Pago de factura, retiro para gastos..." />
+    </div>
+    <div class="form-group">
+      <label>Monto ($)</label>
+      <input type="number" id="extraMonto" min="0" step=".01" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modalExtra')">Cancelar</button>
+      <button class="btn btn-success" id="btnGuardarExtra" onclick="guardarExtra()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL CONFIRMAR ========== -->
+<div class="modal-overlay" id="modalConfirmar">
+  <div class="modal" style="max-width:400px">
+    <h3 id="confirmarTitulo">¿Confirmar?</h3>
+    <p id="confirmarMensaje" style="color:var(--text-light)"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modalConfirmar')">Cancelar</button>
+      <button class="btn btn-danger" id="btnConfirmar" onclick="confirmarAccion()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL APERTURA CAJA ========== -->
+<div class="modal-overlay" id="modalAperturaCaja">
+  <div class="modal" style="max-width:400px">
+    <h3>🔓 Abrir Caja</h3>
+    <div class="form-group">
+      <label>Monto inicial en caja ($)</label>
+      <input type="number" id="aperturaMonto" min="0" step=".01" value="0" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modalAperturaCaja')">Cancelar</button>
+      <button class="btn btn-success" onclick="confirmarApertura()">🔓 Abrir Caja</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL CERRAR CAJA ========== -->
+<div class="modal-overlay" id="modalCerrarCaja">
+  <div class="modal" style="max-width:450px">
+    <h3>🔒 Cerrar Caja</h3>
+    <div id="resumenCierre"></div>
+    <div class="form-group" style="margin-top:16px">
+      <label>Monto final en caja ($)</label>
+      <input type="number" id="cierreMonto" min="0" step=".01" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modalCerrarCaja')">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarCierre()">🔒 Cerrar Caja</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL ESCANER ========== -->
+<div class="modal-overlay" id="modalEscaner">
+  <div class="modal" style="max-width:550px">
+    <h3>📷 Escanear código de barras</h3>
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:12px">Apuntá la cámara al código de barras del producto</p>
+    <div id="escanerReader" style="min-height:200px;background:#000;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;overflow:hidden"></div>
+    <p id="escanerStatus" style="font-size:13px;color:var(--text-light);margin-top:10px;text-align:center">📷 Iniciando cámara...</p>
+    <div id="escanerResultado" style="display:none;gap:8px;margin-top:8px"></div>
+    <div id="escanerActions" style="display:none;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="capturarAhora()">📸 Capturar y leer</button>
+      <button class="btn btn-outline" onclick="pedirCodigoManual()">✍️ Escribir código</button>
+    </div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn btn-outline" onclick="cerrarEscaner()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CHAT BOT ========== -->
+<div id="chatFab" onclick="toggleChat()">💬</div>
+<div id="chatPanel">
+  <div id="chatHeader">
+    <span>🤖 Asistente Kiosco</span>
+    <button onclick="toggleChat()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px">✕</button>
+  </div>
+  <div id="chatMessages">
+    <div class="chat-msg chat-bot">👋 ¡Hola! Consultame precios, stock o ventas de tus productos.
+
+Ej: "¿Cuánto cuesta el Tofi?" o "stock bajo"</div>
+  </div>
+  <div id="chatInputBar">
+    <input type="text" id="chatInput" placeholder="Escribí tu pregunta..." onkeydown="chatKeydown(event)" />
+    <button onclick="enviarChat()">➤</button>
+  </div>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="js/database.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/modules/dashboard.js"></script>
+<script src="js/modules/products.js"></script>
+<script src="js/modules/sales.js"></script>
+<script src="js/modules/purchases.js"></script>
+<script src="js/modules/cash.js"></script>
+<script src="js/modules/history.js"></script>
+<script src="js/modules/config.js"></script>
+<script src="js/modules/projections.js"></script>
+<script src="js/modules/chatbot.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
