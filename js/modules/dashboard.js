@@ -5,19 +5,16 @@ function renderDashboard() {
   const compras = txs.filter(t => t.tipo === 'compra');
   const hoy = new Date().toDateString();
 
-  // Hoy
   const ventasHoy = ventas.filter(t => new Date(t.fecha).toDateString() === hoy);
   const totalHoy = ventasHoy.reduce((a, t) => a + parseFloat(t.total || 0), 0);
   const comprasHoy = compras.filter(t => new Date(t.fecha).toDateString() === hoy);
   const gastoHoy = comprasHoy.reduce((a, t) => a + parseFloat(t.total || 0), 0);
 
-  // Totales generales
   const totalVentas = ventas.reduce((a, t) => a + parseFloat(t.total || 0), 0);
   const totalCompras = compras.reduce((a, t) => a + parseFloat(t.total || 0), 0);
   const gananciaNeta = totalVentas - totalCompras;
   const unidadesVendidas = ventas.reduce((a, t) => a + (t.items ? t.items.reduce((s, i) => s + (i.cantidad || 0), 0) : 0), 0);
 
-  // Mes actual
   const mes = new Date().getMonth();
   const anio = new Date().getFullYear();
   const ventasMes = ventas.filter(t => {
@@ -26,12 +23,10 @@ function renderDashboard() {
   });
   const totalMes = ventasMes.reduce((a, t) => a + parseFloat(t.total || 0), 0);
 
-  // Stock
   const stockBajo = prods.filter(p => p.stock <= p.stockMinimo);
   const stockTotal = prods.reduce((a, p) => a + (p.stock || 0), 0);
   const valorStock = prods.reduce((a, p) => a + ((p.precioCompra || 0) * (p.stock || 0)), 0);
 
-  // Top productos
   const topProductos = {};
   ventas.forEach(t => {
     if (t.items) t.items.forEach(i => {
@@ -41,7 +36,6 @@ function renderDashboard() {
   });
   const top = Object.entries(topProductos).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  // Caja y medios de pago (sesión actual)
   const cajaAbierta = hayCajaAbierta();
   const sesion = getSesionCaja();
 
@@ -61,52 +55,60 @@ function renderDashboard() {
   const saldo = cajaAbierta ? saldoCajaActual() : 0;
 
   document.getElementById('dashboardStats').innerHTML = `
-    <div class="stat-card accent-blue">
+    <div class="stat-card accent-blue" data-page="historial">
       <div class="stat-label">Ventas Hoy</div>
       <div class="stat-value">$${totalHoy.toFixed(2)}</div>
       <div class="stat-sub">${ventasHoy.length} ventas · Gasto: $${gastoHoy.toFixed(2)}</div>
     </div>
-    <div class="stat-card accent-green">
+    <div class="stat-card accent-green" data-page="historial">
       <div class="stat-label">Ventas del Mes</div>
       <div class="stat-value">$${totalMes.toFixed(2)}</div>
       <div class="stat-sub">${ventasMes.length} ventas · $${totalVentas.toFixed(2)} totales</div>
     </div>
-    <div class="stat-card ${gananciaNeta >= 0 ? 'accent-green' : 'accent-red'}">
+    <div class="stat-card ${gananciaNeta >= 0 ? 'accent-green' : 'accent-red'}" data-page="historial">
       <div class="stat-label">Ganancia Neta</div>
       <div class="stat-value">$${gananciaNeta.toFixed(2)}</div>
       <div class="stat-sub">Ventas $${totalVentas.toFixed(2)} · Compras $${totalCompras.toFixed(2)}</div>
     </div>
-    <div class="stat-card accent-blue">
+    <div class="stat-card accent-blue" data-page="caja">
       <div class="stat-label">💵 Efectivo</div>
       <div class="stat-value">$${efectivo.toFixed(2)}</div>
       <div class="stat-sub">💰 Total disponible: $${saldo.toFixed(2)}</div>
     </div>
-    <div class="stat-card accent-orange">
+    <div class="stat-card accent-orange" data-page="caja">
       <div class="stat-label">💳 Mercado Pago</div>
       <div class="stat-value">$${mercadoPago.toFixed(2)}</div>
       <div class="stat-sub">Tarjeta/Transferencia · ${prods.length} productos</div>
     </div>
-    <div class="stat-card ${cajaAbierta ? 'accent-blue' : 'accent-red'}">
+    <div class="stat-card ${cajaAbierta ? 'accent-blue' : 'accent-red'}" data-page="productos">
       <div class="stat-label">Stock total</div>
       <div class="stat-value">${stockTotal} ud</div>
       <div class="stat-sub">$${valorStock.toFixed(2)} en mercadería · ${stockBajo.length} bajos</div>
     </div>
   `;
 
-  // Stock bajo
+  document.querySelectorAll('#dashboardStats .stat-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const page = el.dataset.page;
+      if (page) navegar(page);
+    });
+  });
+
   document.getElementById('alertasList').innerHTML = stockBajo.length
-    ? stockBajo.map(p => `<div class="alert-item"><span class="nombre">📦 ${p.nombre}</span><span class="stock">Stock: ${p.stock}</span></div>`).join('')
+    ? stockBajo.map(p => `<div class="alert-item" data-page="productos"><span class="nombre">📦 ${p.nombre}</span><span class="stock">Stock: ${p.stock}</span></div>`).join('')
     : '<p style="color:var(--success);padding:8px 0">✅ Todo ok</p>';
 
-  // Top productos
   document.getElementById('topProductosList').innerHTML = top.length
     ? top.map(([nom, cant], i) => {
       const icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-      return `<div class="alert-item" style="border-left-color:var(--primary)"><span class="nombre">${icons[i]||'•'} ${nom}</span><span class="stock" style="color:var(--primary)">${cant} ud</span></div>`;
+      return `<div class="alert-item" data-page="productos" style="border-left-color:var(--primary)"><span class="nombre">${icons[i]||'•'} ${nom}</span><span class="stock" style="color:var(--primary)">${cant} ud</span></div>`;
     }).join('')
     : '<p style="color:var(--text-muted);padding:8px 0">Sin ventas</p>';
 
-  // Últimos movimientos
+  document.querySelectorAll('#alertasList .alert-item, #topProductosList .alert-item').forEach(el => {
+    el.addEventListener('click', () => navegar('productos'));
+  });
+
   const ultimos = getTransaccionesFiltro('todos', 10);
   const tbody = document.getElementById('ultimosMovimientos');
   if (!ultimos.length) {
@@ -116,11 +118,13 @@ function renderDashboard() {
     tbody.innerHTML = ultimos.map(t => {
       const det = t.detalle || (t.items ? t.items.map(i => i.nombre).join(', ') : '');
       const cant = t.items ? t.items.reduce((a, i) => a + i.cantidad, 0) : '-';
-      return `<tr><td>${formatearFecha(t.fecha)}</td><td>${icons[t.tipo]||'📄'} ${t.tipo.replace(/_/g,' ')}</td><td>${det}</td><td>${cant}</td><td>$${parseFloat(t.total||0).toFixed(2)}</td></tr>`;
+      return `<tr data-page="historial"><td>${formatearFecha(t.fecha)}</td><td>${icons[t.tipo]||'📄'} ${t.tipo.replace(/_/g,' ')}</td><td>${det}</td><td>${cant}</td><td>$${parseFloat(t.total||0).toFixed(2)}</td></tr>`;
     }).join('');
+    tbody.querySelectorAll('tr').forEach(el => {
+      el.addEventListener('click', () => navegar('historial'));
+    });
   }
 
-  // Dibujar gráficos después de un tick
   setTimeout(() => { try { dibujarChartVentas(); } catch(e) {} }, 200);
   setTimeout(() => { try { dibujarChartMedios(); } catch(e) {} }, 200);
 }
@@ -143,7 +147,7 @@ function dibujarChartVentas() {
     const d = new Date(); d.setDate(d.getDate() - i);
     const ds = d.toDateString();
     const total = ventas.filter(t => new Date(t.fecha).toDateString() === ds).reduce((a, t) => a + parseFloat(t.total || 0), 0);
-    dias.push({ label: d.getDate() + '/' + (d.getMonth()+1), total });
+    dias.push({ label: d.getDate() + '/' + (d.getMonth()+1), total, fecha: d.toLocaleDateString('es-AR', { weekday:'short', day:'numeric', month:'short' }) });
   }
 
   const max = Math.max(...dias.map(d => d.total), 1);
@@ -154,7 +158,14 @@ function dibujarChartVentas() {
   const barW = Math.max(3, Math.min(16, (gw - sp * (dias.length - 1)) / dias.length));
   const sep = barW + sp;
 
-  // Grid
+  const pts = dias.map((d, i) => ({
+    x: pad.left + sep * i + barW / 2,
+    y: pad.top + gh - (d.total / max) * gh,
+    label: d.label,
+    total: d.total,
+    fecha: d.fecha
+  }));
+
   ctx.strokeStyle = 'rgba(100,116,139,.15)';
   ctx.lineWidth = 0.5;
   for (let i = 0; i <= 4; i++) {
@@ -164,42 +175,51 @@ function dibujarChartVentas() {
     ctx.fillText('$' + Math.round(max - (max / 4) * i), pad.left - 4, y + 3);
   }
 
-  // Línea
   ctx.beginPath();
-  dias.forEach((d, i) => {
-    const x = pad.left + sep * i + barW / 2;
-    const y = pad.top + gh - (d.total / max) * gh;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  pts.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
   });
   ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2.5; ctx.stroke();
 
-  // Puntos
-  dias.forEach((d, i) => {
-    const x = pad.left + sep * i + barW / 2;
-    const y = pad.top + gh - (d.total / max) * gh;
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = d.total > 0 ? '#2563eb' : '#cbd5e1'; ctx.fill();
+  ctx.fillStyle = '#2563eb';
+  pts.forEach((p, i) => {
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.total > 0 ? 4 : 2.5, 0, Math.PI * 2);
+    ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
   });
 
-  // Labels X
   ctx.fillStyle = '#64748b'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
   dias.forEach((d, i) => {
     if (i % 2 === 0 || dias.length <= 7) {
-      const x = pad.left + sep * i + barW / 2;
-      ctx.fillText(d.label, x, h - pad.bottom + 16);
+      ctx.fillText(d.label, pts[i].x, h - pad.bottom + 16);
     }
   });
 
-  // Totales en puntos
   ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
-  dias.forEach((d, i) => {
-    if (d.total > 0) {
-      const x = pad.left + sep * i + barW / 2;
-      const y = pad.top + gh - (d.total / max) * gh;
-      ctx.fillStyle = '#0f172a'; ctx.fillText('$' + d.total.toFixed(0), x, y - 8);
+  pts.forEach((p, i) => {
+    if (p.total > 0) {
+      ctx.fillStyle = '#0f172a'; ctx.fillText('$' + p.total.toFixed(0), p.x, p.y - 8);
     }
   });
+
+  canvas.onmousemove = function(e) {
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const tooltip = document.getElementById('tooltipVentas');
+    let hit = false;
+    for (const p of pts) {
+      if (Math.abs(mx - p.x) < 14 && Math.abs(my - p.y) < 14 && p.total > 0) {
+        tooltip.innerHTML = `<b>${p.fecha}</b><br>$${p.total.toFixed(2)}`;
+        tooltip.style.left = (mx + 12) + 'px';
+        tooltip.style.top = (my - 30) + 'px';
+        tooltip.classList.add('show');
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) tooltip.classList.remove('show');
+  };
+  canvas.onmouseleave = () => document.getElementById('tooltipVentas').classList.remove('show');
 }
 
 function dibujarChartMedios() {
@@ -226,7 +246,6 @@ function dibujarChartMedios() {
     });
   }
 
-  // Si no hay datos de sesión, calcular de todas las transacciones
   if (efec === 0 && mp === 0) {
     const txs = getTransacciones().filter(t => t.tipo === 'venta');
     txs.forEach(t => {
@@ -248,32 +267,30 @@ function dibujarChartMedios() {
     { label: 'M. Pago', value: mp, color: '#f59e0b' }
   ].filter(d => d.value > 0);
 
+  const arcos = [];
   let angulo = -Math.PI / 2;
   datos.forEach(d => {
     const porc = d.value / total;
     const angFinal = angulo + porc * Math.PI * 2;
+    arcos.push({ ...d, angulo, angFinal, porc });
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, r, angulo, angFinal);
     ctx.closePath();
     ctx.fillStyle = d.color; ctx.fill();
-    // separación
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
     angulo = angFinal;
   });
 
-  // Centro blanco (donut)
   const cardColor = getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim() || '#f8fafc';
   ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
   ctx.fillStyle = cardColor; ctx.fill();
 
-  // Total en el centro
   ctx.fillStyle = '#0f172a'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
   ctx.fillText('$' + total.toFixed(0), cx, cy + 1);
   ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif';
   ctx.fillText('total', cx, cy + 14);
 
-  // Leyenda
   const lx = w * 0.72, ly = cy - 20;
   ctx.textAlign = 'left';
   datos.forEach((d, i) => {
@@ -289,4 +306,37 @@ function dibujarChartMedios() {
     ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('100% ' + datos[0].label.toLowerCase(), cx, cy + r + 18);
   }
+
+  canvas.onmousemove = function(e) {
+    const r = canvas.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    const tooltip = document.getElementById('tooltipMedios');
+    const dx = mx - cx, dy = my - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    let hit = false;
+    if (dist < r * 0.45) {
+      tooltip.innerHTML = `<b>Total</b> $${total.toFixed(2)}`;
+      tooltip.style.left = (mx + 12) + 'px';
+      tooltip.style.top = (my - 20) + 'px';
+      tooltip.classList.add('show');
+      hit = true;
+    } else if (dist < r) {
+      let a = Math.atan2(dy, dx);
+      if (a < -Math.PI / 2) a += Math.PI * 2;
+      for (const arco of arcos) {
+        let inicio = arco.angulo, fin = arco.angFinal;
+        if (inicio < -Math.PI / 2) { inicio += Math.PI * 2; fin += Math.PI * 2; }
+        if (a >= inicio && a < fin) {
+          tooltip.innerHTML = `<b>${arco.label}</b><br>$${arco.value.toFixed(2)} (${(arco.porc*100).toFixed(1)}%)`;
+          tooltip.style.left = (mx + 12) + 'px';
+          tooltip.style.top = (my - 20) + 'px';
+          tooltip.classList.add('show');
+          hit = true;
+          break;
+        }
+      }
+    }
+    if (!hit) tooltip.classList.remove('show');
+  };
+  canvas.onmouseleave = () => document.getElementById('tooltipMedios').classList.remove('show');
 }
