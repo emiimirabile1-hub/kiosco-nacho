@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kiosco Nacho - Sistema de Gestión</title>
+  <title>KioscoGO - Sistema de Gestión</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <div class="logo">🏪</div>
-    <h1>Kiosco Nacho</h1>
+    <h1>KioscoGO</h1>
     <p>Iniciá sesión para continuar</p>
     <div class="form-group">
       <label>Usuario</label>
@@ -30,7 +30,7 @@
 
 <!-- ========== HEADER ========== -->
 <header class="app-header">
-  <h1>🏪 Kiosco <span>Nacho</span></h1>
+  <h1>🏪 Kiosco<span>GO</span></h1>
   <div class="header-right">
     <div class="header-user" id="headerUser">
       <span>👤</span>
@@ -353,6 +353,13 @@
           </div>
         </div>
         <div style="margin-bottom:24px">
+          <h3 style="margin-bottom:12px;font-size:15px">🧪 Datos de prueba</h3>
+          <p style="font-size:13px;color:var(--text-light);margin-bottom:8px">
+            Generá datos automáticos para probar el sistema como si fuera un kiosco real funcionando.
+          </p>
+          <button class="btn btn-warning" onclick="generarDatosPrueba()">🧪 Generar datos de prueba</button>
+        </div>
+        <div style="margin-bottom:24px">
           <h3 style="margin-bottom:12px;font-size:15px">🗃️ Gestión de datos</h3>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
             <button class="btn btn-primary" onclick="descargarRespaldo()">📤 Exportar respaldo</button>
@@ -364,7 +371,7 @@
         <div>
           <h3 style="margin-bottom:12px;font-size:15px">ℹ️ Información</h3>
           <p style="color:var(--text-light);font-size:13px">
-            <strong>Kiosco Nacho</strong> v2.0 — Sistema de gestión escolar<br />
+            <strong>KioscoGO</strong> v2.0 — Sistema de gestión escolar<br />
             Los datos se guardan automáticamente en el navegador.<br />
             Usá <strong>Exportar respaldo</strong> periódicamente para no perder información.
           </p>
@@ -585,6 +592,7 @@ Ej: "¿Cuánto cuesta el Tofi?" o "stock bajo"</div>
 <script src="js/modules/config.js"></script>
 <script src="js/modules/projections.js"></script>
 <script src="js/modules/chatbot.js"></script>
+<script src="js/modules/prueba.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
