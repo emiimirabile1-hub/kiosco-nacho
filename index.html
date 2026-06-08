@@ -429,29 +429,23 @@
       <label>Categoría</label>
       <input type="text" id="prodCategoria" placeholder="Ej: Golosinas, Bebidas, Snacks..." />
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input type="checkbox" id="prodAutoPrice" checked onchange="toggleModoPrecio()" />
-        <span>Auto-calcular precio de venta desde margen</span>
-      </label>
-    </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Precio de compra ($)</label>
-          <input type="number" id="prodPrecioCompra" min="0" step=".01" oninput="if(document.getElementById('prodAutoPrice').checked)recalcularPrecioVenta()" />
-        </div>
-        <div class="form-group">
-          <label>Precio de venta ($)</label>
-          <input type="number" id="prodPrecioVenta" min="0" step=".01" onblur="if(!document.getElementById('prodAutoPrice').checked)recalcularMargen()" />
-        </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Precio de compra ($)</label>
+        <input type="number" id="prodPrecioCompra" min="0" step=".01" oninput="calcularMargen()" />
       </div>
       <div class="form-group">
-        <label>Margen de ganancia (%)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="number" id="prodMargen" min="0" max="1000" step="1" oninput="if(document.getElementById('prodAutoPrice').checked)recalcularPrecioVenta()" style="flex:1" />
-          <span style="font-size:11px;color:var(--text-light)" id="prodMargenHint">auto → precio venta</span>
-        </div>
+        <label>Precio de venta ($)</label>
+        <input type="number" id="prodPrecioVenta" min="0" step=".01" oninput="calcularMargen()" />
       </div>
+    </div>
+    <div class="form-group">
+      <label>Margen de ganancia (%)</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="prodMargen" min="0" max="1000" step="1" style="flex:1" />
+        <button type="button" class="btn btn-sm btn-outline" onclick="calcularPrecioVentaDesdeMargen()" title="Calcular precio de venta desde el margen">⚡ Calcular</button>
+      </div>
+    </div>
       <div class="form-row">
         <div class="form-group">
           <label>Stock inicial</label>

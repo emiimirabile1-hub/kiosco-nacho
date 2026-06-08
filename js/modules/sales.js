@@ -98,7 +98,6 @@ function tryBuscarEnAPI(codigo) {
           precioCompra: 0,
           precioVenta: 0,
           margen: getMargenPredeterminado(),
-          autoPrecio: true,
           stock: 0,
           stockMinimo: 5
         };

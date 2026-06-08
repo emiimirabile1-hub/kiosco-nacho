@@ -47,28 +47,23 @@ function renderProductos() {
     .join('');
 }
 
-function toggleModoPrecio() {
-  const auto = document.getElementById('prodAutoPrice').checked;
-  document.getElementById('prodMargen').disabled = !auto;
-  document.getElementById('prodPrecioVenta').readOnly = auto;
-  if (auto) recalcularPrecioVenta();
-}
-
-function recalcularPrecioVenta() {
-  const precioCompra = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
-  const margen = parseFloat(document.getElementById('prodMargen').value) || 0;
-  if (precioCompra > 0 && margen > 0) {
-    const precioVenta = precioCompra * (1 + margen / 100);
-    document.getElementById('prodPrecioVenta').value = precioVenta.toFixed(2);
+function calcularMargen() {
+  const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+  const pv = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
+  if (pc > 0 && pv > 0) {
+    const m = ((pv - pc) / pc) * 100;
+    document.getElementById('prodMargen').value = Math.round(m);
   }
 }
 
-function recalcularMargen() {
-  const precioCompra = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
-  const precioVenta = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
-  if (precioCompra > 0 && precioVenta > 0) {
-    const margen = ((precioVenta - precioCompra) / precioCompra) * 100;
-    document.getElementById('prodMargen').value = Math.round(margen);
+function calcularPrecioVentaDesdeMargen() {
+  const pc = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
+  const m = parseFloat(document.getElementById('prodMargen').value) || 0;
+  if (pc > 0 && m > 0) {
+    const pv = pc * (1 + m / 100);
+    document.getElementById('prodPrecioVenta').value = pv.toFixed(2);
+  } else {
+    alert('Completá precio de compra y margen primero');
   }
 }
 
@@ -81,38 +76,22 @@ function abrirModalProducto(producto) {
   document.getElementById('prodCodigoBarra').value = producto ? producto.codigoBarra || '' : '';
   document.getElementById('prodCategoria').value = producto ? producto.categoria || '' : '';
   document.getElementById('prodPrecioCompra').value = producto ? producto.precioCompra || '' : '';
-
-  const modoAuto = producto ? (producto.autoPrecio !== false) : true;
-  document.getElementById('prodAutoPrice').checked = modoAuto;
-  toggleModoPrecio();
-
-  if (modoAuto) {
-    document.getElementById('prodMargen').value = producto
-      ? producto.margen || getMargenPredeterminado()
-      : getMargenPredeterminado();
-    document.getElementById('prodPrecioVenta').value = producto ? producto.precioVenta || '' : '';
-  } else {
-    document.getElementById('prodMargen').value = producto
-      ? producto.margen || getMargenPredeterminado()
-      : getMargenPredeterminado();
-    document.getElementById('prodPrecioVenta').value = producto ? producto.precioVenta || '' : '';
-  }
+  document.getElementById('prodMargen').value = producto
+    ? producto.margen || getMargenPredeterminado()
+    : getMargenPredeterminado();
+  document.getElementById('prodPrecioVenta').value = producto ? producto.precioVenta || '' : '';
   document.getElementById('prodStock').value = producto ? producto.stock || 0 : 0;
   document.getElementById('prodStockMinimo').value = producto ? producto.stockMinimo || 5 : 5;
   document.getElementById('modalProducto').classList.add('show');
-  if (!producto && modoAuto) recalcularPrecioVenta();
+  if (producto) calcularMargen();
 }
 
 function guardarProductoForm() {
   const nombre = document.getElementById('prodNombre').value.trim();
   if (!nombre) return alert('El nombre del producto es obligatorio');
-  const auto = document.getElementById('prodAutoPrice').checked;
   const margen = parseFloat(document.getElementById('prodMargen').value) || 0;
   const precioCompra = parseFloat(document.getElementById('prodPrecioCompra').value) || 0;
-  let precioVenta = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
-  if (auto && precioCompra > 0 && margen > 0 && precioVenta === 0) {
-    precioVenta = precioCompra * (1 + margen / 100);
-  }
+  const precioVenta = parseFloat(document.getElementById('prodPrecioVenta').value) || 0;
   const p = {
     id: editandoProductoId,
     nombre,
@@ -121,7 +100,6 @@ function guardarProductoForm() {
     precioCompra,
     precioVenta,
     margen,
-    autoPrecio: auto,
     stock: parseInt(document.getElementById('prodStock').value) || 0,
     stockMinimo: parseInt(document.getElementById('prodStockMinimo').value) || 5
   };
@@ -129,6 +107,27 @@ function guardarProductoForm() {
   cerrarModal('modalProducto');
   editandoProductoId = null;
   renderProductos();
+}
+
+function autoCategoria(texto) {
+  const t = (texto || '').toLowerCase();
+  const mapa = [
+    { palabras: ['beer','cerveza','cerveza','birra'], cat: 'Bebidas' },
+    { palabras: ['soda','gaseosa','cola','refresco','soft drink','bebida','drink','jugo','juice','nectar','agua','water','mineral','energetic','energy','isotonic','te','té','mate','yerba'], cat: 'Bebidas' },
+    { palabras: ['galleta','cookies','biscuit','cracker','wafer','oblea'], cat: 'Galletitas' },
+    { palabras: ['snack','chips','papas','palitos','mani','peanut','cacahuate','pretzel','popcorn','pochoclo'], cat: 'Snacks' },
+    { palabras: ['golosina','candy','caramel','dulce','chocolate','bonbon','alfajor','chicle','gum','gomita','marshmallow','caramelo'], cat: 'Golosinas' },
+    { palabras: ['pan','bread','bizcocho','medialuna','factura','tostada','panettone','brioche'], cat: 'Panadería' },
+    { palabras: ['alfajor'], cat: 'Alfajores' },
+    { palabras: ['helado','ice cream','icecream','paleta','polo'], cat: 'Helados' },
+    { palabras: ['lacteo','dairy','leche','milk','yogur','yogurt','queso','cheese','crema','manteca','dulce de leche'], cat: 'Lácteos' },
+    { palabras: ['fideo','pasta','spaghetti','fideo','tallarin','guiso','arroz','rice','harina','flour'], cat: 'Almacén' },
+    { palabras: ['conserva','can','lata','pickle','encurtido','aceituna','oliva'], cat: 'Conservas' },
+    { palabras: ['aderezo','salsa','dressing','ketchup','mayonesa','mostaza','pesto'], cat: 'Aderezos' },
+    { palabras: ['congelado','frozen','milanesa','nugget','hamburguesa','papa frita'], cat: 'Congelados' }
+  ];
+  const resultado = mapa.find(m => m.palabras.some(p => t.includes(p)));
+  return resultado ? resultado.cat : '';
 }
 
 function buscarProductoPorCodigo() {
@@ -157,19 +156,27 @@ function buscarProductoPorCodigo() {
       const p = data.product;
       const nombre = p.product_name || '';
       const marca = p.brands || '';
-      const categoria = p.categories_tags ? p.categories_tags
+      const catRaw = p.categories_tags ? p.categories_tags
         .filter(c => c.startsWith('en:'))
         .map(c => c.replace('en:', ''))
         .join(', ') : '';
       const cantidad = p.quantity || '';
+      const catTags = (p.categories_tags || []).map(c => c.replace(/^(en|es):/, '')).join(' ');
 
       if (nombre) document.getElementById('prodNombre').value = nombre.charAt(0).toUpperCase() + nombre.slice(1);
-      if (categoria) document.getElementById('prodCategoria').value = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+
+      const autoCat = autoCategoria(catTags + ' ' + catRaw);
+      if (autoCat) {
+        document.getElementById('prodCategoria').value = autoCat;
+      } else if (catRaw) {
+        document.getElementById('prodCategoria').value = catRaw.charAt(0).toUpperCase() + catRaw.slice(1);
+      }
 
       let info = '✅ Datos encontrados:\n';
       if (nombre) info += '• Producto: ' + nombre + '\n';
       if (marca) info += '• Marca: ' + marca + '\n';
-      if (categoria) info += '• Categoría: ' + categoria + '\n';
+      if (autoCat) info += '• Categoría: ' + autoCat + '\n';
+      else if (catRaw) info += '• Categoría: ' + catRaw + '\n';
       if (cantidad) info += '• Cantidad: ' + cantidad + '\n';
       if (p.image_url) info += '\n📷 Hay imagen disponible (ver en openfoodfacts.org)';
       alert(info);
