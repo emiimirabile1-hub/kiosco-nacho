@@ -121,8 +121,8 @@ function renderDashboard() {
   }
 
   // Dibujar gráficos después de un tick
-  setTimeout(dibujarChartVentas, 150);
-  setTimeout(dibujarChartMedios, 150);
+  setTimeout(() => { try { dibujarChartVentas(); } catch(e) {} }, 200);
+  setTimeout(() => { try { dibujarChartMedios(); } catch(e) {} }, 200);
 }
 
 function dibujarChartVentas() {
@@ -147,11 +147,12 @@ function dibujarChartVentas() {
   }
 
   const max = Math.max(...dias.map(d => d.total), 1);
-  const pad = { top: 16, right: 10, bottom: 24, left: 44 };
+  const pad = { top: 16, right: 10, bottom: 26, left: 40 };
   const gw = w - pad.left - pad.right;
   const gh = h - pad.top - pad.bottom;
-  const barW = Math.max(6, Math.min(20, gw / dias.length * 0.6));
-  const gap = (gw - barW * dias.length) / (dias.length + 1);
+  const sp = dias.length <= 14 ? Math.max(3, gw / dias.length * 0.3) : 2;
+  const barW = Math.max(3, Math.min(16, (gw - sp * (dias.length - 1)) / dias.length));
+  const sep = barW + sp;
 
   // Grid
   ctx.strokeStyle = 'rgba(100,116,139,.15)';
@@ -164,10 +165,9 @@ function dibujarChartVentas() {
   }
 
   // Línea
-  const colores = ['#2563eb','#16a34a','#dc2626','#f59e0b','#8b5cf6'];
   ctx.beginPath();
   dias.forEach((d, i) => {
-    const x = pad.left + gap + i * (barW + gap) + barW / 2;
+    const x = pad.left + sep * i + barW / 2;
     const y = pad.top + gh - (d.total / max) * gh;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
@@ -175,7 +175,7 @@ function dibujarChartVentas() {
 
   // Puntos
   dias.forEach((d, i) => {
-    const x = pad.left + gap + i * (barW + gap) + barW / 2;
+    const x = pad.left + sep * i + barW / 2;
     const y = pad.top + gh - (d.total / max) * gh;
     ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fillStyle = d.total > 0 ? '#2563eb' : '#cbd5e1'; ctx.fill();
@@ -186,7 +186,7 @@ function dibujarChartVentas() {
   ctx.fillStyle = '#64748b'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
   dias.forEach((d, i) => {
     if (i % 2 === 0 || dias.length <= 7) {
-      const x = pad.left + gap + i * (barW + gap) + barW / 2;
+      const x = pad.left + sep * i + barW / 2;
       ctx.fillText(d.label, x, h - pad.bottom + 16);
     }
   });
@@ -195,7 +195,7 @@ function dibujarChartVentas() {
   ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
   dias.forEach((d, i) => {
     if (d.total > 0) {
-      const x = pad.left + gap + i * (barW + gap) + barW / 2;
+      const x = pad.left + sep * i + barW / 2;
       const y = pad.top + gh - (d.total / max) * gh;
       ctx.fillStyle = '#0f172a'; ctx.fillText('$' + d.total.toFixed(0), x, y - 8);
     }
@@ -263,8 +263,9 @@ function dibujarChartMedios() {
   });
 
   // Centro blanco (donut)
+  const cardColor = getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim() || '#f8fafc';
   ctx.beginPath(); ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
-  ctx.fillStyle = 'var(--card)'; ctx.fill();
+  ctx.fillStyle = cardColor; ctx.fill();
 
   // Total en el centro
   ctx.fillStyle = '#0f172a'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
