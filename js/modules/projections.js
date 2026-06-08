@@ -33,7 +33,7 @@ function renderProyecciones() {
     <div class="dashboard-grid" style="grid-template-columns:1fr 1fr">
       <div class="stat-card accent-blue">
         <div class="stat-label">Período analizado</div>
-        <div class="stat-value" style="font-size:18px">${Math.max(...analysis.map(a => a.dias)).toFixed(0)} días</div>
+        <div class="stat-value" style="font-size:18px">${formatearNumero(Math.max(...analysis.map(a => a.dias)))} días</div>
       </div>
       <div class="stat-card accent-green">
         <div class="stat-label">Productos con ventas</div>
@@ -93,7 +93,7 @@ function renderProyecciones() {
     return `<tr>
       <td><strong>${a.nombre}</strong></td>
       <td>${a.totalUnidades}</td>
-      <td>${a.tasaDiaria.toFixed(2)}</td>
+      <td>${formatearMoneda(a.tasaDiaria)}</td>
       <td>${a.stock}</td>
       <td>${diasRest}</td>
       <td>${rec}</td>
@@ -168,11 +168,10 @@ function dibujarChart() {
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 11px -apple-system, sans-serif';
     ctx.textAlign = 'left';
-    if (barW > 50) ctx.fillText(d.tasa.toFixed(2), startX + 6, y + barH / 2 + 4);
+    if (barW > 50) ctx.fillText(formatearMoneda(d.tasa), startX + 6, y + barH / 2 + 4);
     else {
       ctx.fillStyle = '#64748b';
-      ctx.textAlign = 'left';
-      ctx.fillText(d.tasa.toFixed(2), startX + barW + 4, y + barH / 2 + 4);
+      ctx.fillText(formatearMoneda(d.tasa), startX + barW + 4, y + barH / 2 + 4);
     }
   });
 }

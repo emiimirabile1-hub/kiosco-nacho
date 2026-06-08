@@ -7,14 +7,14 @@ function renderCaja() {
   if (abierta) {
     const s = getSesionCaja();
     document.getElementById('cajaMontoInicial').innerHTML =
-      '$' + parseFloat(s.montoInicial).toFixed(2) +
+      '$' + formatearMoneda(parseFloat(s.montoInicial)) +
       ' <button class="btn-icon" onclick="editarMontoInicial()" title="Editar monto inicial" style="font-size:14px">✏️</button>';
     document.getElementById('cajaIngresos').textContent =
-      '$' + totalVentasCaja().toFixed(2);
+      '$' + formatearMoneda(totalVentasCaja());
     document.getElementById('cajaEgresos').textContent =
-      '$' + totalComprasCaja().toFixed(2);
+      '$' + formatearMoneda(totalComprasCaja());
     document.getElementById('cajaSaldoActual').textContent =
-      '$' + saldoCajaActual().toFixed(2);
+      '$' + formatearMoneda(saldoCajaActual());
     renderMovimientosCaja();
   }
   renderHistorialCierres();
@@ -36,9 +36,9 @@ function renderMovimientosCaja() {
       <td>${formatearFecha(m.fecha)}</td>
       <td>${icons[m.tipo] || ''} ${m.tipo.replace(/_/g, ' ')}</td>
       <td>${m.detalle}</td>
-      <td style="color:var(--success)">${m.ingreso > 0 ? '$' + m.ingreso.toFixed(2) : '—'}</td>
-      <td style="color:var(--danger)">${m.egreso > 0 ? '$' + m.egreso.toFixed(2) : '—'}</td>
-      <td><strong>$${m.saldo.toFixed(2)}</strong></td>
+      <td style="color:var(--success)">${m.ingreso > 0 ? '$' + formatearMoneda(m.ingreso) : '—'}</td>
+      <td style="color:var(--danger)">${m.egreso > 0 ? '$' + formatearMoneda(m.egreso) : '—'}</td>
+      <td><strong>$${formatearMoneda(m.saldo)}</strong></td>
     </tr>`).join('');
 }
 
@@ -57,10 +57,10 @@ function renderHistorialCierres() {
       <td>${formatearFecha(h.fechaApertura)}</td>
       <td>${formatearFecha(h.fechaApertura)}</td>
       <td>${formatearFecha(h.fechaCierre)}</td>
-      <td>$${(h.montoInicial || 0).toFixed(2)}</td>
-      <td>$${(h.ingresos || 0).toFixed(2)}</td>
-      <td>$${(h.egresos || 0).toFixed(2)}</td>
-      <td><strong>$${(h.montoFinal || 0).toFixed(2)}</strong></td>
+      <td>$${formatearMoneda((h.montoInicial || 0))}</td>
+      <td>$${formatearMoneda((h.ingresos || 0))}</td>
+      <td>$${formatearMoneda((h.egresos || 0))}</td>
+      <td><strong>$${formatearMoneda((h.montoFinal || 0))}</strong></td>
     </tr>`).join('');
 }
 
@@ -106,10 +106,10 @@ function cerrarCajaForm() {
   const totalC = totalComprasCaja();
   document.getElementById('resumenCierre').innerHTML = `
     <div class="resumen-cierre">
-      <p><strong>Monto inicial:</strong> $${(s.montoInicial || 0).toFixed(2)}</p>
-      <p><strong>Ventas totales:</strong> <span style="color:var(--success)">+$${totalV.toFixed(2)}</span></p>
-      <p><strong>Compras totales:</strong> <span style="color:var(--danger)">-$${totalC.toFixed(2)}</span></p>
-      <p><strong>Saldo esperado:</strong> $${saldo.toFixed(2)}</p>
+      <p><strong>Monto inicial:</strong> $${formatearMoneda((s.montoInicial || 0))}</p>
+      <p><strong>Ventas totales:</strong> <span style="color:var(--success)">+$${formatearMoneda(totalV)}</span></p>
+      <p><strong>Compras totales:</strong> <span style="color:var(--danger)">-$${formatearMoneda(totalC)}</span></p>
+      <p><strong>Saldo esperado:</strong> $${formatearMoneda(saldo)}</p>
       <hr style="margin:8px 0;border-color:var(--border)">
       <p style="font-size:13px;color:var(--text-light)">Ingresá el monto final para verificar:</p>
     </div>
@@ -122,7 +122,7 @@ function confirmarCierre() {
   const esperado = saldoCajaActual();
   if (Math.abs(monto - esperado) > 0.01) {
     if (!confirm(
-      `⚠️ El monto ingresado ($${monto.toFixed(2)}) no coincide con el saldo esperado ($${esperado.toFixed(2)}). ¿Cerrar de todas formas?`
+      `⚠️ El monto ingresado ($${formatearMoneda(monto)}) no coincide con el saldo esperado ($${formatearMoneda(esperado)}). ¿Cerrar de todas formas?`
     )) return;
   }
   cerrarSesionCaja(monto, '');

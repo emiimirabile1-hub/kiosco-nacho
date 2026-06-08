@@ -40,7 +40,7 @@ function renderProductosVenta() {
         <div class="nombre">${p.nombre}</div>
         <div class="stock">Stock: ${p.stock} ${p.codigoBarra ? '| <code>' + p.codigoBarra + '</code>' : ''}</div>
       </div>
-      <div><span class="precio">$${(p.precioVenta || 0).toFixed(2)}</span></div>
+      <div><span class="precio">$${formatearMoneda((p.precioVenta || 0))}</span></div>
     </div>`
     )
     .join('');
@@ -325,17 +325,17 @@ function renderCarritoVenta() {
     <div class="carrito-item">
       <div>
         <strong>${i.nombre}</strong><br>
-        <small>${i.cantidad} x $${i.precioUnitario.toFixed(2)}</small>
+        <small>${i.cantidad} x $${formatearMoneda(i.precioUnitario)}</small>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <span>$${i.subtotal.toFixed(2)}</span>
+        <span>$${formatearMoneda(i.subtotal)}</span>
         <button class="btn-icon" onclick="quitarDelCarritoVenta(${idx})">❌</button>
       </div>
     </div>`
     )
     .join('');
   const total = carritoVenta.reduce((a, i) => a + i.subtotal, 0);
-  totalEl.textContent = '$' + total.toFixed(2);
+  totalEl.textContent = '$' + formatearMoneda(total);
 }
 
 function quitarDelCarritoVenta(idx) {

@@ -22,7 +22,7 @@ function renderProductos() {
       const ganancia = (p.precioVenta || 0) - (p.precioCompra || 0);
       const margen =
         p.precioCompra > 0
-          ? ((ganancia / p.precioCompra) * 100).toFixed(0)
+          ? formatearNumero(((ganancia / p.precioCompra) * 100))
           : 0;
       let stockClass = 'badge-success';
       if (p.stock <= p.stockMinimo) stockClass = 'badge-danger';
@@ -31,11 +31,11 @@ function renderProductos() {
         <td><strong>${p.nombre}</strong></td>
         <td>${p.codigoBarra ? '<code style="font-size:11px">' + p.codigoBarra + '</code>' : '—'}</td>
         <td>${p.categoria || '—'}</td>
-        <td>$${(p.precioCompra || 0).toFixed(2)}</td>
-        <td>$${(p.precioVenta || 0).toFixed(2)}</td>
+        <td>$${formatearMoneda((p.precioCompra || 0))}</td>
+        <td>$${formatearMoneda((p.precioVenta || 0))}</td>
         <td>${margen}%</td>
         <td><span class="badge ${stockClass}">${p.stock}</span></td>
-        <td>$${ganancia.toFixed(2)}</td>
+        <td>$${formatearMoneda(ganancia)}</td>
         <td>${
           esCajera
             ? '<span style="color:var(--text-muted);font-size:11px">solo lectura</span>'

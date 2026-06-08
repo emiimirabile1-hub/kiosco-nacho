@@ -57,33 +57,33 @@ function renderDashboard() {
   document.getElementById('dashboardStats').innerHTML = `
     <div class="stat-card accent-blue" data-page="historial">
       <div class="stat-label">Ventas Hoy</div>
-      <div class="stat-value">$${totalHoy.toFixed(2)}</div>
-      <div class="stat-sub">${ventasHoy.length} ventas · Gasto: $${gastoHoy.toFixed(2)}</div>
+      <div class="stat-value">$${formatearMoneda(totalHoy)}</div>
+      <div class="stat-sub">${ventasHoy.length} ventas · Gasto: $${formatearMoneda(gastoHoy)}</div>
     </div>
     <div class="stat-card accent-green" data-page="historial">
       <div class="stat-label">Ventas del Mes</div>
-      <div class="stat-value">$${totalMes.toFixed(2)}</div>
-      <div class="stat-sub">${ventasMes.length} ventas · $${totalVentas.toFixed(2)} totales</div>
+      <div class="stat-value">$${formatearMoneda(totalMes)}</div>
+      <div class="stat-sub">${ventasMes.length} ventas · $${formatearMoneda(totalVentas)} totales</div>
     </div>
     <div class="stat-card ${gananciaNeta >= 0 ? 'accent-green' : 'accent-red'}" data-page="historial">
       <div class="stat-label">Ganancia Neta</div>
-      <div class="stat-value">$${gananciaNeta.toFixed(2)}</div>
-      <div class="stat-sub">Ventas $${totalVentas.toFixed(2)} · Compras $${totalCompras.toFixed(2)}</div>
+      <div class="stat-value">$${formatearMoneda(gananciaNeta)}</div>
+      <div class="stat-sub">Ventas $${formatearMoneda(totalVentas)} · Compras $${formatearMoneda(totalCompras)}</div>
     </div>
     <div class="stat-card accent-blue" data-page="caja">
       <div class="stat-label">💵 Efectivo</div>
-      <div class="stat-value">$${efectivo.toFixed(2)}</div>
-      <div class="stat-sub">💰 Total disponible: $${saldo.toFixed(2)}</div>
+      <div class="stat-value">$${formatearMoneda(efectivo)}</div>
+      <div class="stat-sub">💰 Total disponible: $${formatearMoneda(saldo)}</div>
     </div>
     <div class="stat-card accent-orange" data-page="caja">
       <div class="stat-label">💳 Mercado Pago</div>
-      <div class="stat-value">$${mercadoPago.toFixed(2)}</div>
+      <div class="stat-value">$${formatearMoneda(mercadoPago)}</div>
       <div class="stat-sub">Tarjeta/Transferencia · ${prods.length} productos</div>
     </div>
     <div class="stat-card ${cajaAbierta ? 'accent-blue' : 'accent-red'}" data-page="productos">
       <div class="stat-label">Stock total</div>
       <div class="stat-value">${stockTotal} ud</div>
-      <div class="stat-sub">$${valorStock.toFixed(2)} en mercadería · ${stockBajo.length} bajos</div>
+      <div class="stat-sub">$${formatearMoneda(valorStock)} en mercadería · ${stockBajo.length} bajos</div>
     </div>
   `;
 
@@ -118,7 +118,7 @@ function renderDashboard() {
     tbody.innerHTML = ultimos.map(t => {
       const det = t.detalle || (t.items ? t.items.map(i => i.nombre).join(', ') : '');
       const cant = t.items ? t.items.reduce((a, i) => a + i.cantidad, 0) : '-';
-      return `<tr data-page="historial"><td>${formatearFecha(t.fecha)}</td><td>${icons[t.tipo]||'📄'} ${t.tipo.replace(/_/g,' ')}</td><td>${det}</td><td>${cant}</td><td>$${parseFloat(t.total||0).toFixed(2)}</td></tr>`;
+      return `<tr data-page="historial"><td>${formatearFecha(t.fecha)}</td><td>${icons[t.tipo]||'📄'} ${t.tipo.replace(/_/g,' ')}</td><td>${det}</td><td>${cant}</td><td>$${formatearMoneda(parseFloat(t.total||0))}</td></tr>`;
     }).join('');
     tbody.querySelectorAll('tr').forEach(el => {
       el.addEventListener('click', () => navegar('historial'));
@@ -198,7 +198,7 @@ function dibujarChartVentas() {
   ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center';
   pts.forEach((p, i) => {
     if (p.total > 0) {
-      ctx.fillStyle = '#0f172a'; ctx.fillText('$' + p.total.toFixed(0), p.x, p.y - 8);
+      ctx.fillStyle = '#0f172a'; ctx.fillText('$' + formatearNumero(p.total), p.x, p.y - 8);
     }
   });
 
@@ -209,7 +209,7 @@ function dibujarChartVentas() {
     let hit = false;
     for (const p of pts) {
       if (Math.abs(mx - p.x) < 14 && Math.abs(my - p.y) < 14 && p.total > 0) {
-        tooltip.innerHTML = `<b>${p.fecha}</b><br>$${p.total.toFixed(2)}`;
+        tooltip.innerHTML = `<b>${p.fecha}</b><br>$${formatearMoneda(p.total)}`;
         tooltip.style.left = (mx + 12) + 'px';
         tooltip.style.top = (my - 30) + 'px';
         tooltip.classList.add('show');
@@ -287,7 +287,7 @@ function dibujarChartMedios() {
   ctx.fillStyle = cardColor; ctx.fill();
 
   ctx.fillStyle = '#0f172a'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('$' + total.toFixed(0), cx, cy + 1);
+  ctx.fillText('$' + formatearNumero(total), cx, cy + 1);
   ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif';
   ctx.fillText('total', cx, cy + 14);
 
@@ -299,7 +299,7 @@ function dibujarChartMedios() {
     ctx.fillStyle = '#0f172a'; ctx.font = '11px sans-serif';
     ctx.fillText(d.label, lx + 16, y + 9);
     ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
-    ctx.fillText('$' + d.value.toFixed(0) + ' (' + (d.value / total * 100).toFixed(0) + '%)', lx + 16, y + 22);
+    ctx.fillText('$' + formatearNumero(d.value) + ' (' + (d.value / total * 100).toFixed(0) + '%)', lx + 16, y + 22);
   });
 
   if (datos.length === 1) {
@@ -315,7 +315,7 @@ function dibujarChartMedios() {
     const dist = Math.sqrt(dx * dx + dy * dy);
     let hit = false;
     if (dist < r * 0.45) {
-      tooltip.innerHTML = `<b>Total</b> $${total.toFixed(2)}`;
+      tooltip.innerHTML = `<b>Total</b> $${formatearMoneda(total)}`;
       tooltip.style.left = (mx + 12) + 'px';
       tooltip.style.top = (my - 20) + 'px';
       tooltip.classList.add('show');
@@ -327,7 +327,7 @@ function dibujarChartMedios() {
         let inicio = arco.angulo, fin = arco.angFinal;
         if (inicio < -Math.PI / 2) { inicio += Math.PI * 2; fin += Math.PI * 2; }
         if (a >= inicio && a < fin) {
-          tooltip.innerHTML = `<b>${arco.label}</b><br>$${arco.value.toFixed(2)} (${(arco.porc*100).toFixed(1)}%)`;
+          tooltip.innerHTML = `<b>${arco.label}</b><br>$${formatearMoneda(arco.value)} (${(arco.porc*100).toFixed(1)}%)`;
           tooltip.style.left = (mx + 12) + 'px';
           tooltip.style.top = (my - 20) + 'px';
           tooltip.classList.add('show');

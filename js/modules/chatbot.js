@@ -133,9 +133,9 @@ function responderChat(msg) {
       const p = mejor.p;
       const diff = (p.precioVenta || 0) - (p.precioCompra || 0);
       respuesta = `💰 ${p.nombre}\n`;
-      respuesta += `Venta: $${(p.precioVenta || 0).toFixed(2)}\n`;
-      respuesta += `Compra: $${(p.precioCompra || 0).toFixed(2)}\n`;
-      respuesta += `Ganancia: $${diff.toFixed(2)} (${p.margen || 0}%)`;
+      respuesta += `Venta: $${formatearMoneda((p.precioVenta || 0))}\n`;
+      respuesta += `Compra: $${formatearMoneda((p.precioCompra || 0))}\n`;
+      respuesta += `Ganancia: $${formatearMoneda(diff)} (${p.margen || 0}%)`;
       if (p.stock !== undefined) respuesta += `\nStock: ${p.stock} ud`;
       ctxUltimoProducto = p;
     } else if (matchMedio) {
@@ -192,25 +192,25 @@ function responderChat(msg) {
         const item = t.items.find(i => i.productoId === p.id);
         return a + (item ? item.subtotal : 0);
       }, 0);
-      respuesta = `📊 Ventas de ${p.nombre}\nUnidades: ${uds}\nTotal: $${total.toFixed(2)}\nTransacciones: ${pVentas.length}`;
+      respuesta = `📊 Ventas de ${p.nombre}\nUnidades: ${uds}\nTotal: $${formatearMoneda(total)}\nTransacciones: ${pVentas.length}`;
       if (uds > 0 && p.stock > 0) {
         const fechas = pVentas.map(t => new Date(t.fecha).getTime()).sort((a, b) => a - b);
         const dias = Math.max(1, (Date.now() - fechas[0]) / 86400000);
-        respuesta += `\nRotación: ${(uds / dias).toFixed(2)} ud/día → ${(p.stock / (uds / dias)).toFixed(0)} días restantes`;
+        respuesta += `\nRotación: ${formatearMoneda((uds / dias))} ud/día → ${formatearNumero((p.stock / (uds / dias)))} días restantes`;
       }
       ctxUltimoProducto = p;
     } else if (/hoy/i.test(q)) {
       const hoyVentas = ventas.filter(t => new Date(t.fecha).toDateString() === hoy);
-      respuesta = `💳 Ventas de hoy\n${hoyVentas.length} venta(s)\nTotal: $${hoyVentas.reduce((a, t) => a + parseFloat(t.total || 0), 0).toFixed(2)}`;
+      respuesta = `💳 Ventas de hoy\n${hoyVentas.length} venta(s)\nTotal: $${formatearMoneda(hoyVentas.reduce((a, t) => a + parseFloat(t.total || 0), 0))}`;
     } else if (/semana/i.test(q)) {
       const sem = ventas.filter(t => Date.now() - new Date(t.fecha).getTime() < 7*86400000);
-      respuesta = `📈 Ventas de la semana\n${sem.length} venta(s)\nTotal: $${sem.reduce((a, t) => a + parseFloat(t.total || 0), 0).toFixed(2)}`;
+      respuesta = `📈 Ventas de la semana\n${sem.length} venta(s)\nTotal: $${formatearMoneda(sem.reduce((a, t) => a + parseFloat(t.total || 0), 0))}`;
     } else if (/mes/i.test(q)) {
       const mes = ventas.filter(t => Date.now() - new Date(t.fecha).getTime() < 30*86400000);
-      respuesta = `📆 Ventas del mes\n${mes.length} venta(s)\nTotal: $${mes.reduce((a, t) => a + parseFloat(t.total || 0), 0).toFixed(2)}`;
+      respuesta = `📆 Ventas del mes\n${mes.length} venta(s)\nTotal: $${formatearMoneda(mes.reduce((a, t) => a + parseFloat(t.total || 0), 0))}`;
     } else {
       const unidades = ventas.reduce((a, t) => a + (t.items ? t.items.reduce((s, i) => s + (i.cantidad || 0), 0) : 0), 0);
-      respuesta = `💳 Ventas totales: ${ventas.length}\nTotal: $${ventas.reduce((a, t) => a + parseFloat(t.total || 0), 0).toFixed(2)}\nUnidades: ${unidades}`;
+      respuesta = `💳 Ventas totales: ${ventas.length}\nTotal: $${formatearMoneda(ventas.reduce((a, t) => a + parseFloat(t.total || 0), 0))}\nUnidades: ${unidades}`;
       if (ventas.length) {
         const fechas = ventas.map(t => new Date(t.fecha).getTime()).sort((a, b) => a - b);
         respuesta += `\nDesde: ${new Date(fechas[0]).toLocaleDateString()}`;
@@ -230,7 +230,7 @@ function responderChat(msg) {
         respuesta += '\n\nCategorías:\n' + porCat.join('\n');
       }
       if (prods.length <= 8) {
-        respuesta += '\n\nTodos:\n' + prods.map(p => `• ${p.nombre}: $${(p.precioVenta || 0).toFixed(2)} (stock: ${p.stock})`).join('\n');
+        respuesta += '\n\nTodos:\n' + prods.map(p => `• ${p.nombre}: $${formatearMoneda((p.precioVenta || 0))} (stock: ${p.stock})`).join('\n');
       }
     }
   }
@@ -243,7 +243,7 @@ function responderChat(msg) {
     if (catMatch) {
       const filtrados = prods.filter(p => p.categoria === catMatch);
       respuesta = `📂 ${catMatch} (${filtrados.length})\n` +
-        filtrados.map(p => `• ${p.nombre}: $${(p.precioVenta || 0).toFixed(2)}`).join('\n');
+        filtrados.map(p => `• ${p.nombre}: $${formatearMoneda((p.precioVenta || 0))}`).join('\n');
     } else if (cats.length) {
       respuesta = '📂 Categorías:\n' + cats.join('\n') + '\n\nDecí el nombre de una para ver sus productos.';
     } else {
@@ -265,7 +265,7 @@ function responderChat(msg) {
   else if (candidatos.length > 0) {
     const top = candidatos.slice(0, 3);
     respuesta = 'Encontré estos productos. ¿Querés saber precio, stock o ventas de alguno?\n' +
-      top.map((s, i) => `${i+1}) ${s.p.nombre} — $${(s.p.precioVenta || 0).toFixed(2)} (stock: ${s.p.stock})`).join('\n');
+      top.map((s, i) => `${i+1}) ${s.p.nombre} — $${formatearMoneda((s.p.precioVenta || 0))} (stock: ${s.p.stock})`).join('\n');
     if (candidatos.length > 3) respuesta += `\n... y ${candidatos.length - 3} más`;
   }
 

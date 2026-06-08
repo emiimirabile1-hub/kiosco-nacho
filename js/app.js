@@ -1,6 +1,14 @@
 // ==================== INIT ====================
 initData();
 
+// ==================== FORMATOS ====================
+function formatearMoneda(n) {
+  return Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatearNumero(n) {
+  return Number(n).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
 // ==================== DARK MODE ====================
 function getTema() {
   return localStorage.getItem('kiosco_tema') || 'light';
@@ -62,7 +70,7 @@ function actualizarHeaderCaja() {
   const monto = document.getElementById('cajaMontoHeader');
   if (dot) dot.className = 'dot ' + (abierta ? 'open' : 'closed');
   if (text) text.textContent = abierta ? 'Caja abierta' : 'Caja cerrada';
-  if (monto) monto.textContent = '$' + (abierta ? saldoCajaActual().toFixed(2) : '0');
+  if (monto) monto.textContent = '$' + (abierta ? formatearMoneda(saldoCajaActual()) : '0');
 }
 
 function actualizarReloj() {

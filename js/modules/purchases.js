@@ -90,10 +90,10 @@ function renderCarritoCompraResumen() {
     <div class="carrito-item">
       <div>
         <strong>${i.nombre}</strong><br>
-        <small>${i.cantidad} x $${i.precioUnitario.toFixed(2)}</small>
+        <small>${i.cantidad} x $${formatearMoneda(i.precioUnitario)}</small>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
-        <span>$${i.subtotal.toFixed(2)}</span>
+        <span>$${formatearMoneda(i.subtotal)}</span>
         <button class="btn-icon" onclick="quitarItemCompra(${idx})">❌</button>
       </div>
     </div>`
@@ -102,7 +102,7 @@ function renderCarritoCompraResumen() {
   el.innerHTML = items;
   resEl.innerHTML = items;
   const total = carritoCompra.reduce((a, i) => a + i.subtotal, 0);
-  totalEl.textContent = '$' + total.toFixed(2);
+  totalEl.textContent = '$' + formatearMoneda(total);
 }
 
 function confirmarCompra() {

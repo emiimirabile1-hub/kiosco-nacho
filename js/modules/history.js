@@ -32,8 +32,8 @@ function renderHistorial() {
         t.tipo === 'ingreso_extra' ||
         t.tipo === 'apertura'
       )
-        ingreso = '$' + (t.total || 0).toFixed(2);
-      else egreso = '$' + (t.total || 0).toFixed(2);
+        ingreso = '$' + formatearMoneda(t.total || 0);
+      else egreso = '$' + formatearMoneda(t.total || 0);
       return `<tr>
         <td>${formatearFecha(t.fecha)}</td>
         <td>${icons[t.tipo] || ''} ${t.tipo.replace(/_/g, ' ')}</td>
